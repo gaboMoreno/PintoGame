@@ -1,0 +1,26 @@
+{
+  "name": "pinto_game",
+  "version": "0.0.1",
+  "description": "Card Game , named Pinto. University Project. UNA, Costa Rica",
+  "main": "node_deploy.js",
+  "scripts": {
+    "test": "node node_deploy.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaboMoreno/PintoGame.git"
+  },
+  "keywords": [
+    "pintgame"
+  ],
+  "author": "Gabriel Moreno & Jose Jimenez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gaboMoreno/PintoGame/issues"
+  },
+  "homepage": "https://github.com/gaboMoreno/PintoGame#readme",
+  "dependencies": {
+    "express": "^4.16.2",
+    "util": "^0.10.3"
+  }
+}
