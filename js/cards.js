@@ -38,17 +38,12 @@ var cards = (function() {
 		if ($(opt.table).css('position') == 'static') {
 			$(opt.table).css('position', 'relative');
 		}
-		//for (var i = start; i <= end; i++) {
-			all.push(new cards.Card('h', 2,opt.table));
-			all.push(new cards.Card('c', 5,opt.table));
-			all.push(new cards.Card('h', 3,opt.table));
-			all.push(new cards.Card('h', 4,opt.table));
-			all.push(new cards.Card('h', 6,opt.table));
-			/*all.push(new Card('h', i, opt.table));
+		for (var i = start; i <= end; i++) {
+			all.push(new Card('h', i, opt.table));
 			all.push(new Card('s', i, opt.table));
 			all.push(new Card('d', i, opt.table));
-			all.push(new Card('c', i, opt.table));*/
-		//}
+			all.push(new Card('c', i, opt.table));
+		}
 		if (opt.blackJoker) {
 			all.push(new Card('bj', 0, opt.table));
 		}
@@ -270,6 +265,7 @@ var cards = (function() {
 			var me = this;
 			var i = 0;
 			var totalCount = count*hands.length;
+			var actualHand = 0;
 			function dealOne() {
 				if (me.length == 0 || i == totalCount) {
 					if (callback) {
@@ -277,8 +273,9 @@ var cards = (function() {
 					}
 					return;
 				}
-				hands[i%hands.length].addCard(me.topCard());
-				hands[i%hands.length].render({callback:dealOne, speed:speed});
+				actualHand =  i == count ? actualHand+1 : actualHand;
+				hands[actualHand].addCard(me.topCard());
+				hands[actualHand].render({callback:dealOne, speed:speed});
 				i++;
 			}
 			dealOne();
