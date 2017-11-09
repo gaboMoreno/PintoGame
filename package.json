@@ -20,7 +20,8 @@
   },
   "homepage": "https://github.com/gaboMoreno/PintoGame#readme",
   "dependencies": {
-    "express": "^4.16.2",
+    "express": "^4.15.2",
+    "socket.io": "^2.0.4",
     "util": "^0.10.3"
   }
 }

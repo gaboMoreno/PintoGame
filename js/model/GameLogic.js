@@ -12,15 +12,18 @@ class Card{
 
 
 var gameRules = [
+    (cardPlayer,cardTopDis) => cardTopDis == null,
     (cardPlayer,cardTopDis) => cardTopDis.rank == 7 && cardPlayer.rank <= 7,
     (cardPlayer,cardTopDis) => cardPlayer.rank == 1,
-    (cardPlayer,cardTopDis) => cardTopDis.rank <= cardPlayer.rank
+    (cardPlayer,cardTopDis) => cardTopDis.rank <= cardPlayer.rank && cardTopDis.rank != 1 && cardTopDis.rank !=7
 ];
 
 const ACTION_SUBMIT_CARD    = "submit_card";
 const ACTION_TAKE_CARD      = "take_card";
+const ACTION_TAKE_DISCARPILE= "take_discarpile";
 const C_TAKE_CARD           = "callback_take_card";
 const C_DISCARD_CARD        = "callback_discard_card";
+const C_TAKE_DISCARPILE     = "callback_take_discarpile";
 const C_REMOVE_DISCARD_CARDS= "callback_remove_discard_cards";
 
 class GameLogic{
@@ -30,7 +33,7 @@ class GameLogic{
 
         //In the beta version of the pinto game, there will be only 2 players per game.
         this.idPlayer1 = idPlayer1;
-        this.idPlayer2 = idPlayer2;
+        this.idPlayer2 = idPlayer2; 
         
         this.players = {};
         this.players[idPlayer1] = [];
@@ -97,12 +100,20 @@ class GameLogic{
         this.players[playerID] =  this.players[playerID].filter( c => c.rank != card.rank && c.suit != card.suit);
     }
 
+    changePlayerTurn(){
+        this.actualPlayer = this.idPlayer1 == this.actualPlayer ? this.idPlayer2 : this.idPlayer1;
+    }
+
+    chackifPlayerWins(){
+
+    }
+
     executeStep(playerID, action, card){
         let resp = {};
 
         //not player turn 
         if(playerID != this.actualPlayer){
-            [resp.status,resp.desc] = ["error", "It Not your turn, my friend...."];
+            [resp.status,resp.desc] = ["error", "It's NOT your turn, my friend...."];
             return resp;
         }
             
@@ -112,9 +123,21 @@ class GameLogic{
             this.deck[playerID].push(cardTopDeck);
 
             let callbackactions = [this.makeCallBackAct(C_TAKE_CARD, cardTopDeck)];
-            [resp.status,resp.desc, resp.cb] = ["ok", "Card Taken", callbackactions];
-            return resp;
+            [resp.status,resp.desc, resp.cb, resp.player] = ["ok", "Card Taken", callbackactions, playerID];
+            
         }
+
+
+        else if(action == ACTION_TAKE_DISCARPILE ){
+            this.players[playerID] = this.players[playerID].concat(this.discardCards);
+
+            let callbackactions = [this.makeCallBackAct(C_TAKE_DISCARPILE, this.discardCards)];
+            this.discardCards = [];
+
+            [resp.status,resp.desc, resp.cb] = ["ok", "discarpile taken", callbackactions];
+            
+        }
+
 
         //put card into the discard pile
         if(card.rank == 10){
@@ -127,7 +150,7 @@ class GameLogic{
             let callbackactions = [this.makeCallBackAct(C_DISCARD_CARD, card),
                                    this.makeCallBackAct(C_REMOVE_DISCARD_CARDS,"")];
             [resp.status,resp.desc, resp.cb] = ["ok", "Discard pile removed", callbackactions];
-            return resp;
+            
         }
 
 
@@ -137,10 +160,18 @@ class GameLogic{
 
             let callbackactions = [this.makeCallBackAct(C_DISCARD_CARD, card)];
             [resp.status,resp.desc, resp.cb] = ["ok", "Discard card", callbackactions];
-            return resp;
+            
         }
 
-        //TODO ----take all cards if not suit
+        if(resp.status)
+            this.changePlayerTurn();
+        else
+            [resp.status,resp.desc] = ["error", "No action could be performe"];
+        
+        return resp;
+      
     }
 
 }
+
+module.exports.GameLogic = GameLogic;

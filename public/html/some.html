@@ -1,0 +1,28 @@
+
+<button onclick="callServer()"> buton </button>
+
+
+<script src="../js/jquery-1.7.min.js"></script>
+<script src="../js/socket.io.js"></script>
+<script>
+    var socket = io();
+    let user_number;
+
+    function callServer(){
+        socket.emit('test1', "from user 1");
+    }
+
+    socket.on('replay', function(msg){
+        console.log(msg);
+    });
+
+    socket.on('assing_user_number', function(msg){
+        user_number = msg;
+        console.log(user_number);
+    });
+
+    socket.on('user_lost_connection', function(msg){
+        user_number = msg;
+        console.log(user_number);
+    });
+  </script>
