@@ -17,6 +17,9 @@ const C_REMOVE_DISCARD_CARDS= "callback_remove_discard_cards";
 let cb_handler = {};
 cb_handler[C_DISCARD_CARD] = discard_card;
 cb_handler[C_TAKE_CARD] = take_card;
+cb_handler[C_TAKE_DISCARPILE] = take_discard_pile;
+cb_handler[C_REMOVE_DISCARD_CARDS] = remove_discar_pile;
+
 
 //------------------------------------------------------
 
@@ -33,6 +36,10 @@ lowerhand = new cards.Hand({faceUp:true, y:340});
 
 discardPile = new cards.Deck({faceUp:true});
 discardPile.x += 50;
+
+erasedPile = new cards.Deck({faceUp:true});
+erasedPile.x = 500;
+erasedPile.y = 340;
 
 
 //-------------------------------------------------------
@@ -53,6 +60,7 @@ socket.on('assing_user_number', function(msg){
 
 socket.on('user_lost_connection', function(msg){
 	console.log(msg);
+	location.reload();
 });
 
 socket.on('game_begin', function(msg){
@@ -76,6 +84,16 @@ socket.on('replay_gameLogic', function(msg){
 
 
 //---------------------------------
+//------------UTILS----------------
+//---------------------------------
+
+
+function takeCards (source, destination){
+	while(source.topCard())
+		destination.addCard(source.topCard());
+	destination.render();
+}
+
 
 function replaceCardsOnDeck(data){
 	let cards = data[user_number];
@@ -93,6 +111,7 @@ function setFirstDiscard(card) {
 	mergeCards(deck.topCard(), card);
 	discardPile.addCard(deck.topCard());
 	discardPile.render();
+	deck.render()
 }
 
 function mergeCards(target,source){
@@ -113,7 +132,6 @@ function handleCallback(callbacks, player){
 
 function findIndexCard(hand, card){
 	for(let i=0;i<hand.length;i++){
-		console.log(hand[i]);
 		if(hand[i].suit == card.suit  && hand[i].rank ==card.rank){
 			return i;
 		}
@@ -124,9 +142,9 @@ function findIndexCard(hand, card){
 //---------------------------------------------------
 //--------------callback methods---------------------
 //---------------------------------------------------
-function take_card(params, player){
+function take_card(params, player){ 	
 	if(user_number == player){
-		mergeCards(deck.topCard(), params);
+		mergeCards(deck.topCard(), params[0]);
 		lowerhand.addCard(deck.topCard());
 		lowerhand.render();
 		return;
@@ -134,7 +152,6 @@ function take_card(params, player){
 	
 	upperhand.addCard(deck.topCard());
 	upperhand.render();
-
 }
 
 function discard_card(params, player){
@@ -143,18 +160,31 @@ function discard_card(params, player){
 	mergeCards(upperhand[0],params);
 	discardPile.addCard((user_number == player) ? lowerhand[index] : upperhand[0] );
 	discardPile.render();
+	lowerhand.render();
+	upperhand.render();
 }
 
+function take_discard_pile(params, player){
+	takeCards(discardPile, (user_number == player) ? lowerhand : upperhand );
+	discardPile.render();
+}
 
+function remove_discar_pile(parmas, player){
+	takeCards(discardPile, erasedPile);
+	discardPile.render();
+}
 //---------------------------------------------------
 //--------------Reactive actions---------------------
 //---------------------------------------------------
 
 deck.click(function(card){
 	if (card === deck.topCard()) {
-		lowerhand.addCard(deck.topCard());
-		lowerhand.render();
+		socket.emit(ACTION_TAKE_CARD, cardSimplifier(card));
 	}
+});
+
+discardPile.click(function(card){
+		socket.emit(ACTION_TAKE_DISCARPILE, cardSimplifier(card));
 });
 
 lowerhand.click(function(card){

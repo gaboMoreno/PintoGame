@@ -105,11 +105,19 @@ class GameLogic{
     }
 
     chackifPlayerWins(){
+                //TODO
+    }
 
+    takeCardRequeried(playerID){
+        return this.players[playerID].length < 3 && this.deck.length != 0;
     }
 
     executeStep(playerID, action, card){
         let resp = {};
+
+        console.log("player : "+ playerID);
+        console.log(this.players[playerID]);
+        console.log("---------------------");
 
         //not player turn 
         if(playerID != this.actualPlayer){
@@ -120,7 +128,7 @@ class GameLogic{
         //take card from deck
         if(action == ACTION_TAKE_CARD){
             let cardTopDeck = this.deck.splice(0,1);
-            this.deck[playerID].push(cardTopDeck);
+            this.players[playerID].push(cardTopDeck);
 
             let callbackactions = [this.makeCallBackAct(C_TAKE_CARD, cardTopDeck)];
             [resp.status,resp.desc, resp.cb, resp.player] = ["ok", "Card Taken", callbackactions, playerID];
@@ -128,7 +136,7 @@ class GameLogic{
         }
 
 
-        else if(action == ACTION_TAKE_DISCARPILE ){
+        else if(action == ACTION_TAKE_DISCARPILE ){ 
             this.players[playerID] = this.players[playerID].concat(this.discardCards);
 
             let callbackactions = [this.makeCallBackAct(C_TAKE_DISCARPILE, this.discardCards)];
@@ -138,9 +146,8 @@ class GameLogic{
             
         }
 
-
         //put card into the discard pile
-        if(card.rank == 10){
+        else if(card.rank == 10){
             //empty discard pile
             this.discardCards = [];
             
@@ -149,6 +156,10 @@ class GameLogic{
 
             let callbackactions = [this.makeCallBackAct(C_DISCARD_CARD, card),
                                    this.makeCallBackAct(C_REMOVE_DISCARD_CARDS,"")];
+            
+            if(this.takeCardRequeried(playerID))
+                callbackactions = callbackactions.concat(this.makeCallBackAct(C_TAKE_CARD,  this.deck.splice(0,1)));
+
             [resp.status,resp.desc, resp.cb, resp.player] = ["ok", "Discard pile removed", callbackactions, playerID];
             
         }
@@ -159,6 +170,10 @@ class GameLogic{
             this.removeFromPlayerHand(playerID, card);
 
             let callbackactions = [this.makeCallBackAct(C_DISCARD_CARD, card)];
+
+            if(this.takeCardRequeried(playerID))
+                callbackactions = callbackactions.concat(this.makeCallBackAct(C_TAKE_CARD,  this.deck.splice(0,1)));
+
             [resp.status,resp.desc, resp.cb, resp.player] = ["ok", "Discard card", callbackactions, playerID];
         }
 

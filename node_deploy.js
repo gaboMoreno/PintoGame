@@ -4,7 +4,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var GM = require('./model/GameLogic');
 
-let totalUsers;
+let totalUsers = 0;
 let gameLogic;
 
 
@@ -14,12 +14,26 @@ const ACTION_TAKE_DISCARPILE= "take_discarpile";
 
 app.use(express.static(__dirname + '/public'));
 
+
+
+//Clear Game
+app.get('/clear', function(req, res){
+	totalUsers = 1;
+	delete gameLogic ;
+	res.send("Ok, Game Clear");
+});
+
+
+//MAIN page
 app.get('/', function(req, res){
 	res.sendFile(__dirname + '/public/html/pintoGame.html');
   });
 
+
+
+
 io.on('connection', function (socket) {
-	totalUsers = !totalUsers ? 1 : totalUsers + 1 ;
+	totalUsers = totalUsers==0 ? 1 : totalUsers + 1 ;
 	socket.userNumber= totalUsers;
 	
 	//Pinto v0.1 only is avaliable for 2 players at the same time
@@ -41,17 +55,24 @@ io.on('connection', function (socket) {
 	//------------------------------------------------------------------------------------
 	//--------------------------------GAME LOGIC------------------------------------------
 	//------------------------------------------------------------------------------------
-	socket.on('disconnect', function (socket) {
+	socket.on('disconnect', function () {
 		totalUsers--;
 		io.emit("user_lost_connection", "The other player lost connection");
 	});
 
 	socket.on(ACTION_SUBMIT_CARD, function (card) {
 		let resp = gameLogic.executeStep(socket.userNumber,ACTION_SUBMIT_CARD, card);
-		if(resp.status == "error")
-			socket.emit("replay_gameLogic",resp);
-		else
-			io.emit("replay_gameLogic",resp);
+		handleReplay(resp, socket);
+	});
+
+	socket.on(ACTION_TAKE_CARD, function (card) {
+		let resp = gameLogic.executeStep(socket.userNumber,ACTION_TAKE_CARD, card);
+		handleReplay(resp, socket);
+	});
+
+	socket.on(ACTION_TAKE_DISCARPILE, function (card) {
+		let resp = gameLogic.executeStep(socket.userNumber,ACTION_TAKE_DISCARPILE, card);
+		handleReplay(resp, socket);
 	});
   
   });
@@ -59,3 +80,11 @@ io.on('connection', function (socket) {
 http.listen(3000, function(){
   console.log('listening on *:3000');
 })
+
+
+function handleReplay(resp, socket){
+	if(resp.status == "error")
+		socket.emit("replay_gameLogic",resp);
+	else
+		io.emit("replay_gameLogic",resp);
+}
