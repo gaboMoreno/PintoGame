@@ -97,8 +97,8 @@ function takeCards (source, destination){
 
 function replaceCardsOnDeck(data){
 	let cards = data[user_number];
-	console.log(cards);
 	cards.forEach( (e, i) => mergeCards(deck[i+43], e) );
+	deck.forEach( (e,i)=> console.log(i+" "+e.suit+" "+e.rank));
 	deck.render();
 	initGame();
 }
@@ -108,8 +108,8 @@ function initGame(){
 }
 
 function setFirstDiscard(card) {
-	mergeCards(deck.topCard(), card);
-	discardPile.addCard(deck.topCard());
+	mergeCards(deck[33], card);
+	discardPile.addCard(deck[33]);
 	discardPile.render();
 	deck.render()
 }
@@ -147,10 +147,12 @@ function take_card(params, player){
 		mergeCards(deck.topCard(), params[0]);
 		lowerhand.addCard(deck.topCard());
 		lowerhand.render();
+		lowerhand.render();
 		return;
 	}
 	
 	upperhand.addCard(deck.topCard());
+	upperhand.render();
 	upperhand.render();
 }
 
@@ -178,9 +180,9 @@ function remove_discar_pile(parmas, player){
 //---------------------------------------------------
 
 deck.click(function(card){
-	if (card === deck.topCard()) {
-		socket.emit(ACTION_TAKE_CARD, cardSimplifier(card));
-	}
+	// if (card === deck.topCard()) {
+	// 	socket.emit(ACTION_TAKE_CARD, cardSimplifier(card));
+	// }
 });
 
 discardPile.click(function(card){

@@ -26,7 +26,7 @@ app.get('/clear', function(req, res){
 
 //MAIN page
 app.get('/', function(req, res){
-	res.sendFile(__dirname + '/public/html/pintoGame.html');
+	res.sendFile(__dirname + '/public/html/index.html');
   });
 
 

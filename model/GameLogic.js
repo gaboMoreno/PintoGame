@@ -13,6 +13,7 @@ class Card{
 
 var gameRules = [
     (cardPlayer,cardTopDis) => cardTopDis == null,
+    (cardPlayer,cardTopDis) => cardPlayer.rank == 2,
     (cardPlayer,cardTopDis) => cardTopDis.rank == 7 && cardPlayer.rank <= 7,
     (cardPlayer,cardTopDis) => cardPlayer.rank == 1,
     (cardPlayer,cardTopDis) => cardTopDis.rank <= cardPlayer.rank && cardTopDis.rank != 1 && cardTopDis.rank !=7
@@ -97,7 +98,7 @@ class GameLogic{
 
 
     removeFromPlayerHand(playerID, card){
-        this.players[playerID] =  this.players[playerID].filter( c => c.rank != card.rank && c.suit != card.suit);
+        this.players[playerID] =  this.players[playerID].filter( c => c.rank != card.rank || c.suit != card.suit);
     }
 
     changePlayerTurn(){
@@ -114,10 +115,6 @@ class GameLogic{
 
     executeStep(playerID, action, card){
         let resp = {};
-
-        console.log("player : "+ playerID);
-        console.log(this.players[playerID]);
-        console.log("---------------------");
 
         //not player turn 
         if(playerID != this.actualPlayer){
